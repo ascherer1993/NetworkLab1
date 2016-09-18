@@ -1,5 +1,15 @@
 #include <stdio.h>
 int main() {
+	struct ClientRequest
+	{
+		unsigned char  TotalMessageLength;
+		unsigned char  RequestID;
+		unsigned char  OpCode;
+		unsigned char  NumberOfOperands;
+		unsigned short  Operand1;
+		unsigned short  Operand2;
+	} __attribute__((__packed__));
+
 	struct test
 	{
 		unsigned char  field1;
