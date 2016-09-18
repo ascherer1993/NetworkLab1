@@ -23,7 +23,7 @@ def validateInput(input):
 	return isValid
 
 TCP_IP = '127.0.0.1'
-TCP_PORT = 10010
+TCP_PORT = 10022
 BUFFER_SIZE = 1024
 
 breakFlag = 1;
