@@ -49,6 +49,7 @@ int main(void)
 	struct sigaction sa;
 	int yes=1;
 	char s[INET6_ADDRSTRLEN];
+	char buf[1024];
 	int rv;
 
 	memset(&hints, 0, sizeof hints);
@@ -120,9 +121,16 @@ int main(void)
 		printf("server: got connection from %s\n", s);
 
 		if (!fork()) { // this is the child process
+			bzero(buf, 1024);
+    		int n = read(new_fd, buf, 1024);
+    		if (n < 0) {
+		      perror("read");
+		    }
+    		printf("server received %d bytes: %s", n, buf);
 			close(sockfd); // child doesn't need the listener
-			if (send(new_fd, "Hello, world!", 13, 0) == -1)
+			if (send(new_fd, buf, strlen(buf), 0) == -1) {
 				perror("send");
+			}
 			close(new_fd);
 			exit(0);
 		}
