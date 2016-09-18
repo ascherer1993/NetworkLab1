@@ -118,7 +118,7 @@ int main(void)
 		inet_ntop(their_addr.ss_family,
 			get_in_addr((struct sockaddr *)&their_addr),
 			s, sizeof s);
-		printf("server: got connection from %s\n", s);
+		printf("\nserver: got connection from %s", s);
 
 		if (!fork()) { // this is the child process
 			bzero(buf, 1024);
@@ -126,7 +126,7 @@ int main(void)
     		if (n < 0) {
 		      perror("read");
 		    }
-    		printf("server received %d bytes: %s", n, buf);
+    		printf(", received %d bytes: %s\n", n, buf);
 			close(sockfd); // child doesn't need the listener
 			if (send(new_fd, buf, strlen(buf), 0) == -1) {
 				perror("send");
