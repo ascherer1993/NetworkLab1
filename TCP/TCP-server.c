@@ -127,6 +127,40 @@ int main(void)
 		      perror("read");
 		    }
     		printf(", received %d bytes: %s\n", n, buf);
+
+    		if (strlen(buf) != 8)
+    		{
+    			printf("Error");
+    		}
+    		
+			short operand1 = buf[5] | buf[4] << 8;
+    		short operand2 = buf[7] | buf[6] << 8;
+    		short returnValue = 0;
+    		switch (buf[2])
+    		{
+    			case '0':
+    				returnValue = operand1 + operand2;
+    				printf("%d\n", returnValue);
+    				break;
+    			case '1':
+    				break;
+    			default:
+    				printf("oops\n");
+
+    		}
+    		//printf("%d\n Here\n", strlen(buf));
+    		//for (int i = 0; i < 4; i++)
+    		//{
+    		//	printf("%c\n", buf[i]);
+    		//}
+    		//printf("%01x%01x\n", buf[4], buf[5]);
+    		//printf("%01x%01x\n", buf[6], buf[7]);
+    		
+    		//printf("%02x\n", x);
+    		//printf("%d\n", x);
+    		//printf("%d\n", y);
+
+
 			close(sockfd); // child doesn't need the listener
 			if (send(new_fd, buf, strlen(buf), 0) == -1) {
 				perror("send");
