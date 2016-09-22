@@ -1,5 +1,6 @@
 import socket
 import fileinput
+import struct
 
 def validateInput(input):
 	splitInput = input.split()
@@ -28,15 +29,40 @@ BUFFER_SIZE = 1024
 TML = 8
 
 breakFlag = 1;
+requestID = 0;
 while (breakFlag):
 	MESSAGE = raw_input("Opcode Operand1 Operand2: ")
 	if MESSAGE == "q": 
 		breakFlag = 0
 	else: 
 		if validateInput(MESSAGE):
+
+			# tcpRequest = "8" + str(requestID)
+			
+
+			splitInput = MESSAGE.split()
+
+			# print struct.pack('>h', int(splitInput[1]))
+			# tcpRequest = tcpRequest + splitInput[0]
+			# tcpRequest = tcpRequest + str(len(splitInput) - 1)
+			# tcpRequest = tcpRequest +  str(struct.pack('>H', int(splitInput[1])))
+
+			if len(splitInput) == 3 :
+				tcpRequest = struct.pack('>cccchh', "8", str(requestID), str(splitInput[0]), str(len(splitInput) - 1), int(splitInput[1]), int(splitInput[2]))
+			else :
+				tcpRequest = struct.pack('>cccchh', "8", str(requestID), str(splitInput[0]), str(len(splitInput) - 1), int(splitInput[1]), int(0))
+			requestID = requestID + 1
+			print tcpRequest
+
+			# tcpRequest = tcpRequest + str(struct.unpack("1H", splitInput[1]))
+
+
 			s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 			s.connect((TCP_IP, TCP_PORT))
-			s.send()
+			# s.send(MESSAGE)
+			s.send(tcpRequest)
 			data = s.recv(BUFFER_SIZE)
 			s.close()
 			print "received data:", data
+
+
