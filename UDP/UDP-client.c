@@ -15,6 +15,16 @@
 
 #define SERVERPORT "10022"	// the port users will be connecting to
 
+struct ClientRequest
+	{
+		unsigned char  TotalMessageLength;
+		unsigned char  RequestID;
+		unsigned char  OpCode;
+		unsigned char  NumberOfOperands;
+		unsigned short  Operand1;
+		unsigned short  Operand2;
+	} __attribute__((__packed__));
+
 int main(int argc, char *argv[])
 {
 	int sockfd;
