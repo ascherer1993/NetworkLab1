@@ -31,6 +31,7 @@ TML = 8
 breakFlag = 1;
 requestID = 0;
 while (breakFlag):
+	
 	MESSAGE = raw_input("Opcode Operand1 Operand2: ")
 	if MESSAGE == "q": 
 		breakFlag = 0

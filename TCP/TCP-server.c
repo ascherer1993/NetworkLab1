@@ -202,12 +202,12 @@ int main(void)
 
 
 			close(sockfd); // child doesn't need the listener
-			if (send(new_fd, buf, strlen(buf), 0) == -1) {
-				perror("send");
-			}
-			// if (send(new_fd, response, strlen(response), 0) == -1) {
+			// if (send(new_fd, buf, strlen(buf), 0) == -1) {
 			// 	perror("send");
 			// }
+			if (send(new_fd, (const void *) &response, sizeof(response), 0) == -1) {
+				perror("send");
+			}
 			close(new_fd);
 			exit(0);
 		}
