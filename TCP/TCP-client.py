@@ -1,26 +1,26 @@
 import socket
 import fileinput
 import struct
+import time
 
 def validateInput(input):
 	splitInput = input.split()
 	isValid = 1
-	if len(splitInput) < 2:
-		print "Error: You must send at least two numbers."
+	if len(splitInput) != 3:
+		print "Error: You must send 3 numbers in the format \'# # #\'."
+		isValid = 0
+	if splitInput[0].isdigit() == False: 
+		print "Error: Operand 1 must be an integer"
 		isValid = 0		
-	else:
-		if len(splitInput) > 3:
-			print "Error: You may send a max of three numbers"
-			isValid = 0		
-		if int(splitInput[0]) > 6:
-			print "Error: opcode must be between 0 and 6"
-			isValid = 0
-		if splitInput[1].isdigit() == False: 
-			print "Error: Operand 1 must be an integer"
-			isValid = 0
-		if len(splitInput) == 3 and splitInput[2].isdigit() == False: 
-			print "Error: Operand 2 must be an integer"
-			isValid = 0
+	if int(splitInput[0]) > 6:
+		print "Error: opcode must be between 0 and 6"
+		isValid = 0
+	if splitInput[1].isdigit() == False: 
+		print "Error: Operand 1 must be an integer"
+		isValid = 0
+	if splitInput[2].isdigit() == False: 
+		print "Error: Operand 2 must be an integer"
+		isValid = 0
 	return isValid
 
 TCP_IP = '127.0.0.1'
@@ -31,7 +31,7 @@ TML = 8
 breakFlag = 1;
 requestID = 0;
 while (breakFlag):
-	
+
 	MESSAGE = raw_input("Opcode Operand1 Operand2: ")
 	if MESSAGE == "q": 
 		breakFlag = 0
@@ -50,9 +50,9 @@ while (breakFlag):
 
 			# lower case b instead of c for unsigned char (integers)
 			if len(splitInput) == 3 :
-				tcpRequest = struct.pack('>cccchh', "8", str(requestID), str(splitInput[0]), str(len(splitInput) - 1), int(splitInput[1]), int(splitInput[2]))
+				tcpRequest = struct.pack('>bbbbhh', 8, int(requestID), int(splitInput[0]), int(len(splitInput) - 1), int(splitInput[1]), int(splitInput[2]))
 			else :
-				tcpRequest = struct.pack('>cccchh', "8", str(requestID), str(splitInput[0]), str(len(splitInput) - 1), int(splitInput[1]), int(0))
+				tcpRequest = struct.pack('>bbbbh', 8, int(requestID), int(splitInput[0]), int(len(splitInput) - 1), int(splitInput[1]))
 			requestID = requestID + 1
 			print tcpRequest
 
@@ -62,9 +62,23 @@ while (breakFlag):
 			s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 			s.connect((TCP_IP, TCP_PORT))
 			# s.send(MESSAGE)
+
+
+			start = time.time() # Messures time of sending and receiving data
 			s.send(tcpRequest)
 			data = s.recv(BUFFER_SIZE)
+			end = time.time()
+			timeElapsed = end - start
+
 			s.close()
-			print "received data:", data
+
+			unpackedStruct = struct.unpack_from('>bbbl', data)
+			# test = struct.unpack('>bbbl', str(data))
+
+			print "Message length: " + str(unpackedStruct[0])
+			print "Request ID: " + str(unpackedStruct[1])
+			print "Error Code: " + str(unpackedStruct[2])
+			print "Result: " + str(unpackedStruct[3])
+			print "Time Elapsed: " + str(round(timeElapsed * 1000, 2)) + " milliseconds.\n\n"
 
 

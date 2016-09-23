@@ -134,8 +134,11 @@ int main(void)
 
 		if (!fork()) { // this is the child process
 			bzero(buf, 1024);
+
+			//Struct for return message
 			struct ServerResponse response;
 			response.errorCode = 0;
+			long returnValue = 0;
 
     		int n = read(new_fd, buf, 1024);
     		if (n < 0) {
@@ -143,7 +146,7 @@ int main(void)
 		    }
     		printf(", received %d bytes: %s\n", n, buf);
 
-    		printf("%d\n", sizeof(buf));
+    		//printf("%d\n", sizeof(buf));
 
     		char requestSize = buf[0];
     		char requestID = buf[1];
@@ -151,61 +154,55 @@ int main(void)
     		char numOfOperands = buf[3];
 			short operand1 = buf[5] | buf[4] << 8;
     		short operand2 = buf[7] | buf[6] << 8;
-
     		
     		response.totalMessageLength = 7;
     		response.requestID = buf[1];
 
 
-    		short returnValue = 0;
+    		
     		switch (buf[2])
     		{
-    			case '0':
+    			case 0:
     				returnValue = operand1 + operand2;
-    				printf("%d\n", returnValue);
     				break;
-    			case '1':
+    			case 1:
     				returnValue = operand1 - operand2;
-    				printf("%d\n", returnValue);
     				break;
-    			case '2':
+    			case 2:
     				returnValue = operand1 | operand2;
-    				printf("%d\n", returnValue);
     				break;
-    			case '3':
+    			case 3:
     				returnValue = operand1 & operand2;
-    				printf("%d\n", returnValue);
     				break;
-    			case '4':
+    			case 4:
     				returnValue = operand1 >> operand2;
-    				printf("%d\n", returnValue);
     				break;
-    			case '5':
+    			case 5:
     				returnValue = operand1 << operand2;
-    				printf("%d\n", returnValue);
     				break;
     			default:
-    				printf("oops\n");
     				response.errorCode = 127;
 
     		}
-    		response.result = returnValue;
+    		//response.result = returnValue;
     		
+    		response.result = (returnValue<<24) | ((returnValue<<8) & 0x00ff0000) | ((returnValue>>8) & 0x0000ff00) | (returnValue>>24);
+
     		printf("Info Received:\n");
-    		printf("Size of Request: %c\n", requestSize);
-    		printf("Request ID: %c\n", requestID);
-    		printf("Op Code: %c\n", opCode);
-    		printf("Number of Operands: %c\n", numOfOperands);
+    		printf("Size of Request: %d\n", requestSize);
+    		printf("Request ID: %d\n", requestID);
+    		printf("Op Code: %d\n", opCode);
+    		printf("Number of Operands: %d\n", numOfOperands);
     		printf("Operand 1: %d\n", operand1);
 			printf("Operand 2: %d\n", operand2);
-			printf("Operation Result: %d\n", returnValue);
+			printf("Operation Result: %d\n\n", returnValue);
 
 
 			close(sockfd); // child doesn't need the listener
 			// if (send(new_fd, buf, strlen(buf), 0) == -1) {
 			// 	perror("send");
 			// }
-			if (send(new_fd, (const void *) &response, sizeof(response), 0) == -1) {
+			if (send(new_fd, (const void *) &response, sizeof(&response), 0) == -1) {
 				perror("send");
 			}
 			close(new_fd);
