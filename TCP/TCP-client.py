@@ -10,10 +10,10 @@ def validateInput(input):
 		print "Error: You must send 3 numbers in the format \'# # #\'."
 		isValid = 0
 	if splitInput[0].isdigit() == False: 
-		print "Error: Operand 1 must be an integer"
+		print "Error: The opcode must be between 0 and 6"
 		isValid = 0		
-	if int(splitInput[0]) > 6:
-		print "Error: opcode must be between 0 and 6"
+	elif int(splitInput[0]) > 6:
+		print "Error: The opcode must be between 0 and 6"
 		isValid = 0
 	if splitInput[1].isdigit() == False: 
 		print "Error: Operand 1 must be an integer"
@@ -21,6 +21,8 @@ def validateInput(input):
 	if splitInput[2].isdigit() == False: 
 		print "Error: Operand 2 must be an integer"
 		isValid = 0
+	if not isValid:
+		print "\n"
 	return isValid
 
 TCP_IP = '127.0.0.1'
@@ -31,7 +33,14 @@ TML = 8
 breakFlag = 1;
 requestID = 0;
 while (breakFlag):
-
+	print 'Format: OP # #'
+	print 'OP codes:'
+	print '0 : +'
+	print '1 : -'
+	print '2 : |'
+	print '3 : &'
+	print '4 : >>'
+	print '5 : <<'
 	MESSAGE = raw_input("Opcode Operand1 Operand2: ")
 	if MESSAGE == "q": 
 		breakFlag = 0
@@ -81,4 +90,4 @@ while (breakFlag):
 			print "Result: " + str(unpackedStruct[3])
 			print "Time Elapsed: " + str(round(timeElapsed * 1000, 2)) + " milliseconds.\n\n"
 
-
+			print "-------------------------------------------------------------"
