@@ -162,7 +162,7 @@ int main(int argc, char *argv[])
 			diff = clock() - start;
 			int msec = diff * 1000 / CLOCKS_PER_SEC;
 			printf("\tresult for request %hu: %u\n", responseID, result);
-			printf("\tTime taken: %ds %dms\n", msec/1000, msec%1000);
+			printf("\tTime taken: %ds %dms\n", msec/100, msec%100);
 			printf("\tError code: %hu\n", errorcode);
 		}
 	}
