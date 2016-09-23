@@ -47,6 +47,7 @@ while (breakFlag):
 			# tcpRequest = tcpRequest + str(len(splitInput) - 1)
 			# tcpRequest = tcpRequest +  str(struct.pack('>H', int(splitInput[1])))
 
+			# lower case b instead of c for unsigned char (integers)
 			if len(splitInput) == 3 :
 				tcpRequest = struct.pack('>cccchh', "8", str(requestID), str(splitInput[0]), str(len(splitInput) - 1), int(splitInput[1]), int(splitInput[2]))
 			else :

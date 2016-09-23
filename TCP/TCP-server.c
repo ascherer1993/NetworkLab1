@@ -145,6 +145,10 @@ int main(void)
 
     		printf("%d\n", sizeof(buf));
 
+    		char requestSize = buf[0];
+    		char requestID = buf[1];
+    		char opCode = buf[2];
+    		char numOfOperands = buf[3];
 			short operand1 = buf[5] | buf[4] << 8;
     		short operand2 = buf[7] | buf[6] << 8;
 
@@ -187,26 +191,23 @@ int main(void)
     		}
     		response.result = returnValue;
     		
-    		//printf("%d\n Here\n", strlen(buf));
-    		//for (int i = 0; i < 4; i++)
-    		//{
-    		//	printf("%c\n", buf[i]);
-    		//}
-    		//printf("%01x%01x\n", buf[4], buf[5]);
-    		//printf("%01x%01x\n", buf[6], buf[7]);
-    		
-    		//printf("%02x\n", x);
-    		//printf("%d\n", x);
-    		//printf("%d\n", y);
+    		printf("Info Received:\n");
+    		printf("Size of Request: %c\n", requestSize);
+    		printf("Request ID: %c\n", requestID);
+    		printf("Op Code: %c\n", opCode);
+    		printf("Number of Operands: %c\n", numOfOperands);
+    		printf("Operand 1: %d\n", operand1);
+			printf("Operand 2: %d\n", operand2);
+			printf("Operation Result: %d\n", returnValue);
 
 
 			close(sockfd); // child doesn't need the listener
-			//if (send(new_fd, buf, strlen(buf), 0) == -1) {
-				//perror("send");
-			//}
-			if (send(new_fd, response, strlen(response), 0) == -1) {
+			if (send(new_fd, buf, strlen(buf), 0) == -1) {
 				perror("send");
 			}
+			// if (send(new_fd, response, strlen(response), 0) == -1) {
+			// 	perror("send");
+			// }
 			close(new_fd);
 			exit(0);
 		}
