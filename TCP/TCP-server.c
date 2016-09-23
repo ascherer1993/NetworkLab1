@@ -19,6 +19,16 @@
 
 #define BACKLOG 10	 // how many pending connections queue will hold
 
+
+struct ServerResponse
+	{
+		unsigned char  totalMessageLength;
+		unsigned char  requestID;
+		unsigned char errorCode;
+		unsigned long  result;
+	} __attribute__((__packed__));
+
+
 void sigchld_handler(int s)
 {
 	// waitpid() might overwrite errno, so we save and restore it:
@@ -51,6 +61,8 @@ int main(void)
 	char s[INET6_ADDRSTRLEN];
 	char buf[1024];
 	int rv;
+
+	
 
 	memset(&hints, 0, sizeof hints);
 	hints.ai_family = AF_UNSPEC;
@@ -122,19 +134,25 @@ int main(void)
 
 		if (!fork()) { // this is the child process
 			bzero(buf, 1024);
+			struct ServerResponse response;
+			response.errorCode = 0;
+
     		int n = read(new_fd, buf, 1024);
     		if (n < 0) {
 		      perror("read");
 		    }
     		printf(", received %d bytes: %s\n", n, buf);
 
-    		if (strlen(buf) != 8)
-    		{
-    			printf("Error");
-    		}
-    		
+    		printf("%d\n", sizeof(buf));
+
 			short operand1 = buf[5] | buf[4] << 8;
     		short operand2 = buf[7] | buf[6] << 8;
+
+    		
+    		response.totalMessageLength = 7;
+    		response.requestID = buf[1];
+
+
     		short returnValue = 0;
     		switch (buf[2])
     		{
@@ -143,11 +161,32 @@ int main(void)
     				printf("%d\n", returnValue);
     				break;
     			case '1':
+    				returnValue = operand1 - operand2;
+    				printf("%d\n", returnValue);
+    				break;
+    			case '2':
+    				returnValue = operand1 | operand2;
+    				printf("%d\n", returnValue);
+    				break;
+    			case '3':
+    				returnValue = operand1 & operand2;
+    				printf("%d\n", returnValue);
+    				break;
+    			case '4':
+    				returnValue = operand1 >> operand2;
+    				printf("%d\n", returnValue);
+    				break;
+    			case '5':
+    				returnValue = operand1 << operand2;
+    				printf("%d\n", returnValue);
     				break;
     			default:
     				printf("oops\n");
+    				response.errorCode = 127;
 
     		}
+    		response.result = returnValue;
+    		
     		//printf("%d\n Here\n", strlen(buf));
     		//for (int i = 0; i < 4; i++)
     		//{
@@ -162,7 +201,10 @@ int main(void)
 
 
 			close(sockfd); // child doesn't need the listener
-			if (send(new_fd, buf, strlen(buf), 0) == -1) {
+			//if (send(new_fd, buf, strlen(buf), 0) == -1) {
+				//perror("send");
+			//}
+			if (send(new_fd, response, strlen(response), 0) == -1) {
 				perror("send");
 			}
 			close(new_fd);
