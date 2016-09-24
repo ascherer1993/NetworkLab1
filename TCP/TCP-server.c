@@ -130,7 +130,8 @@ int main(void)
 		inet_ntop(their_addr.ss_family,
 			get_in_addr((struct sockaddr *)&their_addr),
 			s, sizeof s);
-		printf("\nserver: got connection from %s", s);
+		
+		//printf("\nserver: got connection from %s", s);
 
 		if (!fork()) { // this is the child process
 			bzero(buf, 1024);
@@ -138,29 +139,32 @@ int main(void)
 			//Struct for return message
 			struct ServerResponse response;
 			response.errorCode = 0;
+
+
 			long returnValue = 0;
 
     		int n = read(new_fd, buf, 1024);
     		if (n < 0) {
 		      perror("read");
 		    }
+		    printf("\nserver: got connection from %s", s);
     		printf(", received %d bytes: %s\n", n, buf);
 
-    		//printf("%d\n", sizeof(buf));
+    		//This is what stores the request in variables
 
     		char requestSize = buf[0];
     		char requestID = buf[1];
     		char opCode = buf[2];
     		char numOfOperands = buf[3];
-			short operand1 = buf[5] | buf[4] << 8;
-    		short operand2 = buf[7] | buf[6] << 8;
+			short operand1 = buf[4] << 8 | buf[5];
+    		short operand2 = buf[6] << 8 | buf[7];
     		
     		response.totalMessageLength = 7;
     		response.requestID = buf[1];
 
 
-    		
-    		switch (buf[2])
+    		//This switch does the actual calculations and stores it in returnValue
+    		switch (opCode)
     		{
     			case 0:
     				returnValue = operand1 + operand2;
@@ -181,13 +185,15 @@ int main(void)
     				returnValue = operand1 << operand2;
     				break;
     			default:
+    				//If an incorrect op code is received, set the errorCode to 127
     				response.errorCode = 127;
 
     		}
-    		//response.result = returnValue;
     		
-    		response.result = (returnValue<<24) | ((returnValue<<8) & 0x00ff0000) | ((returnValue>>8) & 0x0000ff00) | (returnValue>>24);
+    		//This puts the result in big endian. It shifs to the correct position and then ands it to get rid of all the values we don't want
+    		response.result = (returnValue << 24) | ((returnValue << 8) & 0x00ff0000) | ((returnValue >> 8) & 0x0000ff00) | (returnValue >> 24);
 
+    		// Outputs Results
     		printf("Info Received:\n");
     		printf("Size of Request: %d\n", requestSize);
     		printf("Request ID: %d\n", requestID);
@@ -199,9 +205,8 @@ int main(void)
 
 
 			close(sockfd); // child doesn't need the listener
-			// if (send(new_fd, buf, strlen(buf), 0) == -1) {
-			// 	perror("send");
-			// }
+
+			//Returns struct to the client
 			if (send(new_fd, (const void *) &response, sizeof(&response), 0) == -1) {
 				perror("send");
 			}
